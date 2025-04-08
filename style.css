@@ -1,6 +1,6 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #6dd5ed, #2193b0);
+    background: linear-gradient(135deg, #e160d8, #b021a9);
     margin: 0;
     display: flex;
     justify-content: center;
@@ -40,7 +40,7 @@ body {
 }
 
 h1, h2 {
-    color: #007bff;
+    color: #a12bb6;
     margin-bottom: 30px;
     text-align: center;
 }
@@ -75,8 +75,8 @@ input[type="text"]:focus,
 input[type="email"]:focus,
 input[type="password"]:focus,
 input[type="date"]:focus {
-    border-color: #007bff;
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    border-color: #a519a5;
+    box-shadow: 0 0 0 0.2rem rgba(211, 79, 211, 0.25);
 }
 
 .terms-label {
@@ -85,7 +85,7 @@ input[type="date"]:focus {
 }
 
 .terms-label a {
-    color: #007bff;
+    color: #751b74;
     text-decoration: none;
 }
 
