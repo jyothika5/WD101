@@ -3,184 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registration Form</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            background-color: #f4f4f4;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-        }
-
-        h1, h2 {
-            color: #333;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        form {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            width: 400px;
-            max-width: 100%;
-        }
-
-        form div {
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #555;
-        }
-
-        input[type="text"],
-        input[type="email"],
-        input[type="password"],
-        input[type="date"] {
-            width: calc(100% - 12px);
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-            font-size: 16px;
-        }
-
-        input[type="checkbox"] {
-            margin-right: 5px;
-        }
-
-        button[type="submit"] {
-            background-color: #007bff;
-            color: white;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s ease;
-            width: 100%;
-        }
-
-        button[type="submit"]:hover {
-            background-color: #0056b3;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 30px;
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            overflow: hidden; /* To contain the border-radius */
-        }
-
-        th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: left;
-        }
-
-        th {
-            background-color: #f2f2f2;
-            font-weight: bold;
-            color: #333;
-        }
-
-        tbody tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-
-        @media (max-width: 600px) {
-            form {
-                padding: 20px;
-            }
-        }
-    </style>
+    <title>Join Our Community!</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Registration Form</h1>
-    <form id="registrationForm">
-        <div>
-            <label for="name">Name:</label>
-            <input type="text" id="name" required>
+    <div class="container">
+        <div class="form-wrapper">
+            <h1>Become a Member</h1>
+            <form id="registrationForm">
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" placeholder="Enter your full name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" placeholder="Your email address" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" placeholder="Create a strong password" required>
+                </div>
+                <div class="form-group">
+                    <label for="dob">Date of Birth:</label>
+                    <input type="date" id="dob" required>
+                </div>
+                <div class="form-group">
+                    <input type="checkbox" id="terms" name="terms">
+                    <label for="terms" class="terms-label">I agree to the <a href="#">Terms and Conditions</a></label>
+                </div>
+                <button type="submit" class="submit-button">Sign Up</button>
+            </form>
         </div>
-        <div>
-            <label for="email">Email:</label>
-            <input type="email" id="email" required>
+
+        <div class="table-wrapper">
+            <h2>Registered Members</h2>
+            <table id="userTable">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Password</th>
+                        <th>Dob</th>
+                        <th>Accepted terms?</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+            <p id="emptyTableMessage">No members registered yet.</p>
         </div>
-        <div>
-            <label for="password">Password:</label>
-            <input type="password" id="password" required>
-        </div>
-        <div>
-            <label for="dob">Date of Birth:</label>
-            <input type="date" id="dob" required>
-        </div>
-        <div>
-            <input type="checkbox" id="terms" name="terms">
-            <label for="terms">Accept terms?</label>
-        </div>
-        <button type="submit">Register</button>
-    </form>
+    </div>
 
-    <h2>Registered Users</h2>
-    <table id="userTable">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Password</th>
-                <th>Dob</th>
-                <th>Accepted terms?</th>
-            </tr>
-        </thead>
-        <tbody>
-            </tbody>
-    </table>
-
-    <script>
-        const form = document.getElementById('registrationForm');
-        const userTableBody = document.querySelector('#userTable tbody');
-
-        form.addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent default form submission
-
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const dob = document.getElementById('dob').value;
-            const terms = document.getElementById('terms').checked;
-
-            // Create a new row in the table
-            const newRow = userTableBody.insertRow();
-
-            // Insert data into the cells
-            const nameCell = newRow.insertCell();
-            nameCell.textContent = name;
-
-            const emailCell = newRow.insertCell();
-            emailCell.textContent = email;
-
-            const passwordCell = newRow.insertCell();
-            passwordCell.textContent = password; // In a real application, you'd hash this!
-
-            const dobCell = newRow.insertCell();
-            dobCell.textContent = dob;
-
-            const termsCell = newRow.insertCell();
-            termsCell.textContent = terms;
-
-            // Clear the form after submission
-            form.reset();
-        });
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
