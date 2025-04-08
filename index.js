@@ -3,6 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const userTableBody = document.querySelector('#userTable tbody');
     const emptyTableMessage = document.getElementById('emptyTableMessage');
 
+    // Load existing data from localStorage
+    let registeredUsers = JSON.parse(localStorage.getItem('registeredUsers')) || [];
+
     // Function to display error messages
     function displayError(inputElement, message) {
         const errorDiv = inputElement.nextElementSibling;
@@ -30,22 +33,39 @@ document.addEventListener('DOMContentLoaded', () => {
         return emailRegex.test(email);
     }
 
-    // Function to validate password strength (at least 8 characters)
-    function isStrongPassword(password) {
-        return password.length >= 8;
+    // Function to calculate age from Date of Birth
+    function calculateAge(dob) {
+        const today = new Date();
+        const birthDate = new Date(dob);
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        return age;
+    }
+
+    // Function to render the table
+    function renderTable() {
+        userTableBody.innerHTML = ''; // Clear existing table rows
+        registeredUsers.forEach(user => {
+            const newRow = userTableBody.insertRow();
+            newRow.insertCell().textContent = user.name;
+            newRow.insertCell().textContent = user.email;
+            newRow.insertCell().textContent = '********'; // For privacy, don't show actual password
+            newRow.insertCell().textContent = user.dob;
+            newRow.insertCell().textContent = user.acceptedTerms;
+        });
+        updateEmptyTableMessage();
     }
 
     // Function to update the visibility of the empty table message
     function updateEmptyTableMessage() {
-        if (userTableBody.rows.length === 0) {
-            emptyTableMessage.style.display = 'block';
-        } else {
-            emptyTableMessage.style.display = 'none';
-        }
+        emptyTableMessage.style.display = registeredUsers.length === 0 ? 'block' : 'none';
     }
 
-    // Initial call to set the initial state
-    updateEmptyTableMessage();
+    // Initial rendering of the table from stored data
+    renderTable();
 
     registrationForm.addEventListener('submit', function(event) {
         event.preventDefault();
@@ -71,33 +91,20 @@ document.addEventListener('DOMContentLoaded', () => {
             isValid = false;
         }
 
-        // Password validation
-        clearError(passwordInput);
-        if (!isStrongPassword(password)) {
-            displayError(passwordInput, 'Password must be at least 8 characters long.');
+        // Age validation
+        clearError(dobInput);
+        const age = calculateAge(dob);
+        if (age < 18 || age > 55) {
+            displayError(dobInput, 'Users must be between 18 and 55 years old.');
             isValid = false;
         }
 
         if (isValid) {
-            const newRow = userTableBody.insertRow();
-
-            const nameCell = newRow.insertCell();
-            nameCell.textContent = name;
-
-            const emailCell = newRow.insertCell();
-            emailCell.textContent = email;
-
-            const passwordCell = newRow.insertCell();
-            passwordCell.textContent = password; // In a real application, hash this!
-
-            const dobCell = newRow.insertCell();
-            dobCell.textContent = dob;
-
-            const termsCell = newRow.insertCell();
-            termsCell.textContent = acceptedTerms;
-
+            const newUser = { name, email, dob, acceptedTerms };
+            registeredUsers.push(newUser);
+            localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+            renderTable();
             registrationForm.reset();
-            updateEmptyTableMessage();
         }
     });
 });
