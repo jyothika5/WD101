@@ -3,6 +3,38 @@ document.addEventListener('DOMContentLoaded', () => {
     const userTableBody = document.querySelector('#userTable tbody');
     const emptyTableMessage = document.getElementById('emptyTableMessage');
 
+    // Function to display error messages
+    function displayError(inputElement, message) {
+        const errorDiv = inputElement.nextElementSibling;
+        if (!errorDiv || !errorDiv.classList.contains('error-message')) {
+            const newErrorDiv = document.createElement('div');
+            newErrorDiv.classList.add('error-message');
+            inputElement.parentNode.insertBefore(newErrorDiv, inputElement.nextSibling);
+        }
+        inputElement.nextElementSibling.textContent = message;
+        inputElement.classList.add('error');
+    }
+
+    // Function to clear error messages
+    function clearError(inputElement) {
+        const errorDiv = inputElement.nextElementSibling;
+        if (errorDiv && errorDiv.classList.contains('error-message')) {
+            errorDiv.textContent = '';
+        }
+        inputElement.classList.remove('error');
+    }
+
+    // Function to validate email format
+    function isValidEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
+
+    // Function to validate password strength (at least 8 characters)
+    function isStrongPassword(password) {
+        return password.length >= 8;
+    }
+
     // Function to update the visibility of the empty table message
     function updateEmptyTableMessage() {
         if (userTableBody.rows.length === 0) {
@@ -12,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    
+    // Initial call to set the initial state
     updateEmptyTableMessage();
 
     registrationForm.addEventListener('submit', function(event) {
@@ -30,24 +62,42 @@ document.addEventListener('DOMContentLoaded', () => {
         const dob = dobInput.value;
         const acceptedTerms = termsInput.checked;
 
-        const newRow = userTableBody.insertRow();
+        let isValid = true;
 
-        const nameCell = newRow.insertCell();
-        nameCell.textContent = name;
+        // Email validation
+        clearError(emailInput);
+        if (!isValidEmail(email)) {
+            displayError(emailInput, 'Please enter a valid email address.');
+            isValid = false;
+        }
 
-        const emailCell = newRow.insertCell();
-        emailCell.textContent = email;
+        // Password validation
+        clearError(passwordInput);
+        if (!isStrongPassword(password)) {
+            displayError(passwordInput, 'Password must be at least 8 characters long.');
+            isValid = false;
+        }
 
-        const passwordCell = newRow.insertCell();
-        passwordCell.textContent = password;
+        if (isValid) {
+            const newRow = userTableBody.insertRow();
 
-        const dobCell = newRow.insertCell();
-        dobCell.textContent = dob;
+            const nameCell = newRow.insertCell();
+            nameCell.textContent = name;
 
-        const termsCell = newRow.insertCell();
-        termsCell.textContent = acceptedTerms;
+            const emailCell = newRow.insertCell();
+            emailCell.textContent = email;
 
-        registrationForm.reset();
-        updateEmptyTableMessage();
+            const passwordCell = newRow.insertCell();
+            passwordCell.textContent = password; // In a real application, hash this!
+
+            const dobCell = newRow.insertCell();
+            dobCell.textContent = dob;
+
+            const termsCell = newRow.insertCell();
+            termsCell.textContent = acceptedTerms;
+
+            registrationForm.reset();
+            updateEmptyTableMessage();
+        }
     });
 });
