@@ -1,5 +1,4 @@
-
-         document.addEventListener('DOMContentLoaded', () => {
+ document.addEventListener('DOMContentLoaded', () => {
                 const registrationForm = document.getElementById('registrationForm');
                 const userTableBody = document.getElementById('userTableBody');
                 const emailInput = document.getElementById('email');
@@ -102,3 +101,8 @@
                 // Initial load
                 loadUserData();
             });
+            const clearDataBtn = document.getElementById('clearDataBtn');
+clearDataBtn.addEventListener('click', () => {
+    localStorage.removeItem('users');
+    userTableBody.innerHTML = ''; // Clear table display
+});
