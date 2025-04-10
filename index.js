@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const dobInput = document.getElementById('dob');
     const dobError = document.getElementById('dobError');
 
-    // Load existing data from local storage on page load
+    // Load existing data from local storage
     loadUserData();
 
     registrationForm.addEventListener('submit', function(event) {
@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const newUser = { name, email, password, dob, acceptedTerms };
         saveUserData(newUser);
-        renderTable(); // Re-render the table to show the new entry immediately
+        renderTable();
         registrationForm.reset();
     });
 
@@ -86,25 +86,29 @@ document.addEventListener('DOMContentLoaded', () => {
         const users = localStorage.getItem('users');
         if (users) {
             userData = JSON.parse(users);
-            renderTable(userData); // Pass the loaded data to renderTable
+            renderTable();
         }
     }
 
-    function renderTable(usersData = []) {
-        userTableBody.innerHTML = ''; // Clear the table body before rendering
-        usersData.forEach(user => {
-            const row = userTableBody.insertRow();
-            const nameCell = row.insertCell();
-            const emailCell = row.insertCell();
-            const passwordCell = row.insertCell();
-            const dobCell = row.insertCell();
-            const termsCell = row.insertCell();
+    function renderTable() {
+        userTableBody.innerHTML = '';
+        let users = localStorage.getItem('users');
+        if (users) {
+            const userData = JSON.parse(users);
+            userData.forEach(user => {
+                const row = userTableBody.insertRow();
+                const nameCell = row.insertCell();
+                const emailCell = row.insertCell();
+                const passwordCell = row.insertCell();
+                const dobCell = row.insertCell();
+                const termsCell = row.insertCell();
 
-            nameCell.textContent = user.name;
-            emailCell.textContent = user.email;
-            passwordCell.textContent = user.password;
-            dobCell.textContent = user.dob;
-            termsCell.textContent = user.acceptedTerms ? 'Yes' : 'No';
-        });
+                nameCell.textContent = user.name;
+                emailCell.textContent = user.email;
+                passwordCell.textContent = user.password;
+                dobCell.textContent = user.dob;
+                termsCell.textContent = user.acceptedTerms ? 'Yes' : 'No';
+            });
+        }
     }
 });
