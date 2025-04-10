@@ -1,110 +1,114 @@
 document.addEventListener('DOMContentLoaded', () => {
     const registrationForm = document.getElementById('registrationForm');
-    const userTableBody = document.querySelector('#userTable tbody');
-    const emptyTableMessage = document.getElementById('emptyTableMessage');
+    const userTableBody = document.getElementById('userTableBody');
+    const emailInput = document.getElementById('email');
+    const emailError = document.getElementById('emailError');
+    const dobInput = document.getElementById('dob');
+    const dobError = document.getElementById('dobError');
 
-    // Load existing data from localStorage
-    let registeredUsers = JSON.parse(localStorage.getItem('registeredUsers')) || [];
+    // Load existing data from local storage
+    loadUserData();
 
-    // Function to display error messages
-    function displayError(inputElement, message) {
-        const errorDiv = inputElement.nextElementSibling;
-        if (!errorDiv || !errorDiv.classList.contains('error-message')) {
-            const newErrorDiv = document.createElement('div');
-            newErrorDiv.classList.add('error-message');
-            inputElement.parentNode.insertBefore(newErrorDiv, inputElement.nextSibling);
+    registrationForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const name = document.getElementById('name').value;
+        const email = emailInput.value;
+        const password = document.getElementById('password').value;
+        const dob = dobInput.value;
+        const acceptedTerms = document.getElementById('terms').checked;
+
+        // Validate email
+        if (!isValidEmail(email)) {
+            emailError.classList.remove('hidden');
+            return;
+        } else {
+            emailError.classList.add('hidden');
         }
-        inputElement.nextElementSibling.textContent = message;
-        inputElement.classList.add('error');
-    }
 
-    // Function to clear error messages
-    function clearError(inputElement) {
-        const errorDiv = inputElement.nextElementSibling;
-        if (errorDiv && errorDiv.classList.contains('error-message')) {
-            errorDiv.textContent = '';
+        // Validate age
+        const ageValidationResult = isAgeValid(dob);
+        if (ageValidationResult !== true) {
+            dobError.textContent = ageValidationResult; // Set specific error message
+            dobError.classList.remove('hidden');
+            return;
+        } else {
+            dobError.classList.add('hidden');
+            dobError.textContent = "You must be between 18 and 55 years old."; // Reset to default
         }
-        inputElement.classList.remove('error');
-    }
 
-    // Function to validate email format
+        const newUser = { name, email, password, dob, acceptedTerms };
+        saveUserData(newUser);
+        renderTable();
+        registrationForm.reset();
+    });
+
     function isValidEmail(email) {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(email);
     }
 
-    // Function to calculate age from Date of Birth
-    function calculateAge(dob) {
-        const today = new Date();
+    function isAgeValid(dob) {
         const birthDate = new Date(dob);
+        const today = new Date();
         let age = today.getFullYear() - birthDate.getFullYear();
         const monthDiff = today.getMonth() - birthDate.getMonth();
+
         if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
             age--;
         }
-        return age;
-    }
 
-    // Function to render the table
-    function renderTable() {
-        userTableBody.innerHTML = ''; // Clear existing table rows
-        registeredUsers.forEach(user => {
-            const newRow = userTableBody.insertRow();
-            newRow.insertCell().textContent = user.name;
-            newRow.insertCell().textContent = user.email;
-            newRow.insertCell().textContent = '********'; // For privacy, don't show actual password
-            newRow.insertCell().textContent = user.dob;
-            newRow.insertCell().textContent = user.acceptedTerms;
-        });
-        updateEmptyTableMessage();
-    }
-
-    // Function to update the visibility of the empty table message
-    function updateEmptyTableMessage() {
-        emptyTableMessage.style.display = registeredUsers.length === 0 ? 'block' : 'none';
-    }
-
-    // Initial rendering of the table from stored data
-    renderTable();
-
-    registrationForm.addEventListener('submit', function(event) {
-        event.preventDefault();
-
-        const nameInput = document.getElementById('name');
-        const emailInput = document.getElementById('email');
-        const passwordInput = document.getElementById('password');
-        const dobInput = document.getElementById('dob');
-        const termsInput = document.getElementById('terms');
-
-        const name = nameInput.value.trim();
-        const email = emailInput.value.trim();
-        const password = passwordInput.value;
-        const dob = dobInput.value;
-        const acceptedTerms = termsInput.checked;
-
-        let isValid = true;
-
-        // Email validation
-        clearError(emailInput);
-        if (!isValidEmail(email)) {
-            displayError(emailInput, 'Please enter a valid email address.');
-            isValid = false;
+        if (age < 18) {
+            const eighteenYearsAgo = new Date();
+            eighteenYearsAgo.setFullYear(today.getFullYear() - 18);
+            const minDateFormatted = eighteenYearsAgo.toLocaleDateString('en-GB'); // Format as dd/mm/yyyy
+            return `Value must be ${minDateFormatted} or later.`;
         }
 
-        // Age validation
-        clearError(dobInput);
-        const age = calculateAge(dob);
-        if (age < 18 || age > 55) {
-            displayError(dobInput, 'Users must be between 18 and 55 years old.');
-            isValid = false;
+        if (age > 55) {
+            const fiftyFiveYearsAgo = new Date();
+            fiftyFiveYearsAgo.setFullYear(today.getFullYear() - 55);
+            const maxDateFormatted = fiftyFiveYearsAgo.toLocaleDateString('en-GB'); // Format as dd/mm/yyyy
+            return `Value must be ${maxDateFormatted} or earlier.`;
         }
 
-        if (isValid) {
-            const newUser = { name, email, dob, acceptedTerms };
-            registeredUsers.push(newUser);
-            localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+        return true; // Age is valid
+    }
+
+    function saveUserData(user) {
+        let users = localStorage.getItem('users');
+        users = users ? JSON.parse(users) : [];
+        users.push(user);
+        localStorage.setItem('users', JSON.stringify(users));
+    }
+
+    function loadUserData() {
+        const users = localStorage.getItem('users');
+        if (users) {
+            userData = JSON.parse(users);
             renderTable();
-            registrationForm.reset();
         }
-    });
+    }
+
+    function renderTable() {
+        userTableBody.innerHTML = '';
+        let users = localStorage.getItem('users');
+        if (users) {
+            const userData = JSON.parse(users);
+            userData.forEach(user => {
+                const row = userTableBody.insertRow();
+                const nameCell = row.insertCell();
+                const emailCell = row.insertCell();
+                const passwordCell = row.insertCell();
+                const dobCell = row.insertCell();
+                const termsCell = row.insertCell();
+
+                nameCell.textContent = user.name;
+                emailCell.textContent = user.email;
+                passwordCell.textContent = user.password;
+                dobCell.textContent = user.dob;
+                termsCell.textContent = user.acceptedTerms ? 'Yes' : 'No';
+            });
+        }
+    }
 });
