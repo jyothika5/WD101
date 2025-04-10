@@ -1,114 +1,104 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const registrationForm = document.getElementById('registrationForm');
-    const userTableBody = document.getElementById('userTableBody');
-    const emailInput = document.getElementById('email');
-    const emailError = document.getElementById('emailError');
-    const dobInput = document.getElementById('dob');
-    const dobError = document.getElementById('dobError');
 
-    // Load existing data from local storage
-    loadUserData();
-
-    registrationForm.addEventListener('submit', function(event) {
-        event.preventDefault();
-
-        const name = document.getElementById('name').value;
-        const email = emailInput.value;
-        const password = document.getElementById('password').value;
-        const dob = dobInput.value;
-        const acceptedTerms = document.getElementById('terms').checked;
-
-        // Validate email
-        if (!isValidEmail(email)) {
-            emailError.classList.remove('hidden');
-            return;
-        } else {
-            emailError.classList.add('hidden');
-        }
-
-        // Validate age
-        const ageValidationResult = isAgeValid(dob);
-        if (ageValidationResult !== true) {
-            dobError.textContent = ageValidationResult; // Set specific error message
-            dobError.classList.remove('hidden');
-            return;
-        } else {
-            dobError.classList.add('hidden');
-            dobError.textContent = "You must be between 18 and 55 years old."; // Reset to default
-        }
-
-        const newUser = { name, email, password, dob, acceptedTerms };
-        saveUserData(newUser);
-        renderTable();
-        registrationForm.reset();
-    });
-
-    function isValidEmail(email) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    }
-
-    function isAgeValid(dob) {
-        const birthDate = new Date(dob);
-        const today = new Date();
-        let age = today.getFullYear() - birthDate.getFullYear();
-        const monthDiff = today.getMonth() - birthDate.getMonth();
-
-        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-            age--;
-        }
-
-        if (age < 18) {
-            const eighteenYearsAgo = new Date();
-            eighteenYearsAgo.setFullYear(today.getFullYear() - 18);
-            const minDateFormatted = eighteenYearsAgo.toLocaleDateString('en-GB'); // Format as dd/mm/yyyy
-            return `Value must be ${minDateFormatted} or later.`;
-        }
-
-        if (age > 55) {
-            const fiftyFiveYearsAgo = new Date();
-            fiftyFiveYearsAgo.setFullYear(today.getFullYear() - 55);
-            const maxDateFormatted = fiftyFiveYearsAgo.toLocaleDateString('en-GB'); // Format as dd/mm/yyyy
-            return `Value must be ${maxDateFormatted} or earlier.`;
-        }
-
-        return true; // Age is valid
-    }
-
-    function saveUserData(user) {
-        let users = localStorage.getItem('users');
-        users = users ? JSON.parse(users) : [];
-        users.push(user);
-        localStorage.setItem('users', JSON.stringify(users));
-    }
-
-    function loadUserData() {
-        const users = localStorage.getItem('users');
-        if (users) {
-            userData = JSON.parse(users);
-            renderTable();
-        }
-    }
-
-    function renderTable() {
-        userTableBody.innerHTML = '';
-        let users = localStorage.getItem('users');
-        if (users) {
-            const userData = JSON.parse(users);
-            userData.forEach(user => {
-                const row = userTableBody.insertRow();
-                const nameCell = row.insertCell();
-                const emailCell = row.insertCell();
-                const passwordCell = row.insertCell();
-                const dobCell = row.insertCell();
-                const termsCell = row.insertCell();
-
-                nameCell.textContent = user.name;
-                emailCell.textContent = user.email;
-                passwordCell.textContent = user.password;
-                dobCell.textContent = user.dob;
-                termsCell.textContent = user.acceptedTerms ? 'Yes' : 'No';
+         document.addEventListener('DOMContentLoaded', () => {
+                const registrationForm = document.getElementById('registrationForm');
+                const userTableBody = document.getElementById('userTableBody');
+                const emailInput = document.getElementById('email');
+                const emailError = document.getElementById('emailError');
+                const dobInput = document.getElementById('dob');
+                const dobError = document.getElementById('dobError');
+        
+                let users = [];
+        
+                // Load users from localStorage
+                function loadUserData() {
+                    const storedUsers = localStorage.getItem('users');
+                    users = storedUsers ? JSON.parse(storedUsers) : [];
+                    renderTable();
+                }
+        
+                function saveUserData() {
+                    localStorage.setItem('users', JSON.stringify(users));
+                }
+        
+                function renderTable() {
+                    userTableBody.innerHTML = '';
+                    users.forEach(user => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td class="px-5 py-3 border-b border-gray-200">${user.name}</td>
+                            <td class="px-5 py-3 border-b border-gray-200">${user.email}</td>
+                            <td class="px-5 py-3 border-b border-gray-200">${user.password}</td>
+                            <td class="px-5 py-3 border-b border-gray-200">${user.dob}</td>
+                            <td class="px-5 py-3 border-b border-gray-200">${user.acceptedTerms ? 'Yes' : 'No'}</td>
+                        `;
+                        userTableBody.appendChild(row);
+                    });
+                }
+        
+                function isValidEmail(email) {
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    return emailRegex.test(email);
+                }
+        
+                function isAgeValid(dob) {
+                    const birthDate = new Date(dob);
+                    const today = new Date();
+                    let age = today.getFullYear() - birthDate.getFullYear();
+                    const m = today.getMonth() - birthDate.getMonth();
+                    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                        age--;
+                    }
+        
+                    if (age < 18) {
+                        return `You must be at least 18 years old.`;
+                    } else if (age > 55) {
+                        return `You must be 55 or younger.`;
+                    }
+        
+                    return true;
+                }
+        
+                registrationForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+        
+                    const name = document.getElementById('name').value.trim();
+                    const email = emailInput.value.trim();
+                    const password = document.getElementById('password').value.trim();
+                    const dob = dobInput.value;
+                    const acceptedTerms = document.getElementById('terms').checked;
+        
+                    // Email validation
+                    if (!isValidEmail(email)) {
+                        emailError.classList.remove('hidden');
+                        return;
+                    } else {
+                        emailError.classList.add('hidden');
+                    }
+        
+                    // Age validation
+                    const ageCheck = isAgeValid(dob);
+                    if (ageCheck !== true) {
+                        dobError.textContent = ageCheck;
+                        dobError.classList.remove('hidden');
+                        return;
+                    } else {
+                        dobError.classList.add('hidden');
+                        dobError.textContent = "You must be between 18 and 55 years old.";
+                    }
+        
+                    // Terms validation
+                    if (!acceptedTerms) {
+                        alert("You must accept the terms and conditions.");
+                        return;
+                    }
+        
+                    const newUser = { name, email, password, dob, acceptedTerms };
+                    users.push(newUser);
+                    saveUserData();
+                    renderTable();
+                    registrationForm.reset();
+                });
+        
+                // Initial load
+                loadUserData();
             });
-        }
-    }
-});
