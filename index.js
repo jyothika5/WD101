@@ -1,66 +1,88 @@
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('regForm');
     const tableBody = document.getElementById('tableBody');
+    const nameInput = document.getElementById('name');
     const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
     const dobInput = document.getElementById('dob');
+    const termsInput = document.getElementById('terms');
+    const nameError = document.getElementById('name-error');
+    const emailError = document.getElementById('email-error');
+    const passwordError = document.getElementById('password-error');
+    const ageError = document.getElementById('age-error');
+    const termsError = document.getElementById('terms-error');
 
     loadTableData();
 
     form.addEventListener('submit', function(event) {
         event.preventDefault();
 
-        const name = document.getElementById('name').value;
-        const email = emailInput.value;
-        const password = document.getElementById('password').value;
+        const name = nameInput.value.trim();
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
         const dob = dobInput.value;
-        const acceptedTerms = document.getElementById('terms').checked;
+        const acceptedTerms = termsInput.checked;
+
+        let isValid = true;
+
+        // Reset error messages
+        nameError.textContent = '';
+        emailError.textContent = '';
+        passwordError.textContent = '';
+        ageError.textContent = '';
+        termsError.textContent = '';
+
+        // Check for empty fields
+        if (!name) {
+            nameError.textContent = 'Please fill in your name.';
+            isValid = false;
+        }
+        if (!email) {
+            emailError.textContent = 'Please fill in your email.';
+            isValid = false;
+        }
+        if (!password) {
+            passwordError.textContent = 'Please fill in your password.';
+            isValid = false;
+        }
+        if (!dob) {
+            ageError.textContent = 'Please fill in your date of birth.';
+            isValid = false;
+        }
+        if (!acceptedTerms) {
+            termsError.textContent = 'Please accept the terms and conditions.';
+            isValid = false;
+        }
 
         let isEmailValid = isValidEmail(email);
         let isAgeValid = isValidAge(dob);
 
         // Inline email validation feedback
-        const emailError = document.getElementById('email-error');
-        if (!isEmailValid) {
-            if (!emailError) {
-                const errorSpan = document.createElement('span');
-                errorSpan.id = 'email-error';
-                errorSpan.className = 'text-red-500 text-sm italic ml-2';
-                errorSpan.textContent = 'Please include an "@" in the email address.';
-                emailInput.parentNode.insertBefore(errorSpan, emailInput.nextSibling);
-            }
-        } else {
-            if (emailError) {
-                emailError.remove();
-            }
+        if (email && !isEmailValid) {
+            emailError.textContent = `Please include an "@" in the email address. "${email}" is missing an "@".`;
+            isValid = false;
         }
 
         // Inline age validation feedback
-        const ageError = document.getElementById('age-error');
-        if (!isAgeValid) {
-            const age = calculateAge(dob);
-            let errorMessage = 'Value must be ';
-            if (age < 18) {
-                errorMessage += '09/11/' + (new Date().getFullYear() - 18) + ' or later.';
-            } else if (age > 55) {
-                errorMessage += '09/11/' + (new Date().getFullYear() - 55) + ' or earlier.';
-            }
+        if (dob && !isAgeValid) {
+            const today = new Date();
+            const eighteenYearsAgo = new Date(today);
+            eighteenYearsAgo.setFullYear(today.getFullYear() - 18);
+            const fiftyFiveYearsAgo = new Date(today);
+            fiftyFiveYearsAgo.setFullYear(today.getFullYear() - 55);
 
-            if (!ageError) {
-                const errorSpan = document.createElement('span');
-                errorSpan.id = 'age-error';
-                errorSpan.className = 'text-red-500 text-sm italic ml-2';
-                errorSpan.textContent = errorMessage;
-                dobInput.parentNode.insertBefore(errorSpan, dobInput.nextSibling);
-            } else {
-                ageError.textContent = errorMessage; // Update existing error message
+            const eighteenYearsAgoFormatted = formatDate(eighteenYearsAgo);
+            const fiftyFiveYearsAgoFormatted = formatDate(fiftyFiveYearsAgo);
+
+            let errorMessage = `Value must be ${fiftyFiveYearsAgoFormatted} or later.`;
+            if (calculateAge(dob) < 18) {
+                errorMessage = `Value must be ${eighteenYearsAgoFormatted} or earlier.`;
             }
-        } else {
-            if (ageError) {
-                ageError.remove();
-            }
+            ageError.textContent = errorMessage;
+            isValid = false;
         }
 
-        if (isEmailValid && isAgeValid) {
+        if (isValid) {
             const newRowData = { name, email, password, dob, acceptedTerms };
             addRowToTable(newRowData);
             saveTableData();
@@ -88,6 +110,13 @@ document.addEventListener('DOMContentLoaded', () => {
             age--;
         }
         return age;
+    }
+
+    function formatDate(date) {
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
     }
 
     function addRowToTable(data) {
